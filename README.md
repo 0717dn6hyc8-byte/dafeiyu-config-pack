@@ -43,7 +43,7 @@
    ```
 
    `base_url` 填后台网页的地址。记忆选 2 要加 `siliconflow_key_file`，语音选 2 要加 `mimo_key_file`。重跑时每一项都按这个文件来：记忆、语音要填现在在用的那个，填 0 会把已经开着的记忆或语音关掉。
-2. 在配置包文件夹里，用 AstrBot 自带的 Python 跑：`%USERPROFILE%\.astrbot_launcher\instances\<实例文件夹>\venv\Scripts\python.exe -X utf8 tools\import_dafeiyu.py --answers 回答.json`。
+2. 在配置包文件夹里，用 AstrBot 自带的 Python 跑：`%USERPROFILE%\.astrbot_launcher\instances\<实例文件夹>\venv\Scripts\python.exe -X utf8 tools\import_dafeiyu.py --answers 回答.json`。启动器「高级」里改过数据目录的，把 `%USERPROFILE%\.astrbot_launcher` 换成那个目录。
 3. 看最后的结果列表，有打叉的照那一行的提示处理，再跑一次。
 
 ## 不满意，自己改

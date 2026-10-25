@@ -146,11 +146,29 @@ def fill(value, ctx):
     return value
 
 
+def launcher_data_dirs():
+    """启动器的数据目录：默认在用户目录下；在启动器「高级」里改过的，记在 APPDATA 下的设置文件里。"""
+    dirs = []
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        try:
+            d = json.load(open(os.path.join(appdata, "com.github.raven95676.astrbot-launcher", ".data-dir.json"),
+                               encoding="utf-8-sig")).get("data_dir", "").strip()
+            if d:
+                dirs.append(d)
+        except Exception:
+            pass
+    dirs.append(os.path.join(os.path.expanduser("~"), ".astrbot_launcher"))
+    return dirs
+
+
 def find_instances():
     """启动器各实例配置里写的后台端口（启动器常另给端口，这个只当候选）。"""
     found = []
-    home = os.path.expanduser("~")
-    for cfg in glob.glob(os.path.join(home, ".astrbot_launcher", "instances", "*", "core", "data", "cmd_config.json")):
+    cfgs = []
+    for data_dir in launcher_data_dirs():
+        cfgs += glob.glob(os.path.join(data_dir, "instances", "*", "core", "data", "cmd_config.json"))
+    for cfg in cfgs:
         try:
             port = json.load(open(cfg, encoding="utf-8-sig")).get("dashboard", {}).get("port")
         except Exception:
@@ -383,7 +401,7 @@ def main():
                      {"install_method": "market", "market_plugin_id": p["market_id"]}, timeout=600)
         if not api.ok(r):
             warn(f"装不上：{api.msg(r)}")
-            warn("多半是连不上 GitHub。可以在后台「插件 → 插件市场」里手动搜这个插件装，装好再运行一次本工具。")
+            warn("插件是从插件市场的服务器下的，可能一时没响应。等几分钟再运行一次本工具；还装不上，就在后台「插件 → 插件市场」里搜这个插件手动装，装好再运行一次。")
     installed = {p.get("name") for p in (api.call("GET", "/plugins").get("data") or []) if isinstance(p, dict)}
     for p in pack["plugins"]:
         results.append((f"插件 {p['name']}", p["name"] in installed))
