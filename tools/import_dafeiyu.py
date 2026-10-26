@@ -12,6 +12,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -23,6 +24,8 @@ import uuid
 
 PACK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ANSWERS = {}
+# 表情包插件下 GitHub 用的加速站，按顺序试；最后的空串是直连 GitHub。加速站常换常挂，挂了往这里补新的
+GH_ACCELERATORS = ["https://gh.dpik.top/", "https://hk.gh-proxy.com/", "https://ghfast.top/", "https://gh-proxy.com/", ""]
 
 
 def say(msg=""):
@@ -458,6 +461,12 @@ def main():
     step("下载表情包（从表情包插件的资源广场下，几百张图，要一会儿）")
     if "meme_manager" in installed:
         ext = "/plugins/extensions/meme_manager"
+        # 表情包从 GitHub 下，经插件里设的加速站；加速站时好时坏，下不动就换下一个再试
+        cur = meme_accelerator(api)
+        accels = ([cur] if cur and cur not in GH_ACCELERATORS else []) + GH_ACCELERATORS
+        ai, gh_warned = 0, False
+        if cur != accels[0]:
+            meme_accelerator(api, accels[0])
         api.call("POST", f"{ext}/community/index/fetch", {}, timeout=120)
         have = meme_pack_ids(api, ext)
         for mp in pack["meme_packs"]:
@@ -465,11 +474,23 @@ def main():
                 say(f"  {mp['id']}：已有")
                 results.append((f"表情包 {mp['id']}", True))
                 continue
-            r = api.call("POST", f"{ext}/community/install",
-                         {"pack_id": mp["id"], "set_as_default": mp["default"]}, timeout=900)
-            ok = api.ok(r)
+            while True:
+                r = api.call("POST", f"{ext}/community/install",
+                             {"pack_id": mp["id"], "set_as_default": mp["default"]}, timeout=900)
+                ok = api.ok(r)
+                if ok or ai + 1 >= len(accels):
+                    break
+                ai += 1
+                say(f"  {mp['id']}：没下下来（{api.msg(r)[:80]}），换个 GitHub 加速地址再试：{accels[ai] or '直连 GitHub'}")
+                if meme_accelerator(api, accels[ai]) is None:
+                    break
+                api.call("POST", f"{ext}/community/index/fetch", {}, timeout=120)
             say(f"  {mp['id']}：{'完成' if ok else '失败 ' + api.msg(r)}")
             results.append((f"表情包 {mp['id']}", ok))
+            if not ok and not gh_warned:
+                gh_warned = True
+                warn("几个加速地址都没下下来，多半是这会儿连不上 GitHub。过一阵再运行一次本工具；"
+                     "或者在后台「插件 → meme_manager → 配置」里把 GitHub 加速地址换成你能用的，再运行一次。")
         # 默认规则写成「几套一起用」：meme_manager 的选择规则支持 pack_ids 列表，主套排第一
         use = [mp["id"] for mp in sorted(pack["meme_packs"], key=lambda m: not m.get("default"))
                if mp.get("use", True)]
@@ -571,11 +592,20 @@ def main():
             tts_id = d["id"] if upsert_provider(api, conf) else ""
     if tts_id:
         good, why = test_provider(api, tts_id)
-        if not good:
+        if good:
+            say(f"  语音已打开，大约三条回复里有一条会发语音")
+            if voice == "3":
+                say("  豆包是整条回复合成一条语音，要等 15–35 秒才到")
+        else:
+            # 测不通就先关着：开着的话她每发一次语音都会报错
             warn(f"语音测试没通过：{why}")
-        say(f"  语音已打开，大约三条回复里有一条会发语音")
-        if voice == "3":
-            say("  豆包是整条回复合成一条语音，要等 15–35 秒才到")
+            if voice == "1" and re.search(r"WinError 2|找不到指定的文件|ffmpeg", why, re.I):
+                warn("Edge 语音要用 ffmpeg 转格式，这台电脑上多半没装。在 PowerShell 里运行 "
+                     "winget install Gyan.FFmpeg 装上，重启 AstrBot，再运行一次本工具。")
+            conf["enable"] = False
+            upsert_provider(api, conf)
+            tts_id = ""
+            say("  语音先关着，处理好再运行一次本工具")
         results.append(("语音", good))
     elif voice != "0":
         results.append(("语音", False))
@@ -602,7 +632,7 @@ def main():
         tts.update({"enable": False, "provider_id": tts_id, "trigger_probability": v["trigger_probability"]})
     elif tts_id:
         tts.update({"enable": True, "provider_id": tts_id, "trigger_probability": v["trigger_probability"]})
-    elif voice == "0":
+    else:
         tts["enable"] = False
     r = api.call("PUT", "/config-profiles/default", cfg)
     results.append(("全局设置", api.ok(r)))
@@ -635,6 +665,18 @@ def meme_payload(r, key):
 def meme_pack_ids(api, ext):
     packs = meme_payload(api.call("GET", f"{ext}/packs"), "packs") or []
     return {str(p.get("pack_id") or p.get("id")) for p in packs if isinstance(p, dict)}
+
+
+def meme_accelerator(api, url=None):
+    """不给 url：读表情包插件现在的 GitHub 加速地址（读不到返回 None）。给 url：改成它，成功返回 url，失败返回 None。"""
+    r = api.call("GET", "/plugins/config?plugin_id=meme_manager")
+    conf = (r.get("data") or {}).get("config") if isinstance(r.get("data"), dict) else None
+    if not isinstance(conf, dict):
+        return None
+    if url is None:
+        return str(get_path(conf, "community.github_accelerator_url") or "")
+    set_path(conf, "community.github_accelerator_url", url)
+    return url if api.ok(api.call("PUT", "/plugins/config", {"plugin_id": "meme_manager", "config": conf})) else None
 
 
 def meme_use_together(api, ext, wanted):
