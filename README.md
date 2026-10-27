@@ -17,11 +17,25 @@
    - 后台账号和密码：就是你登录 AstrBot 网页用的那个。
    - 你的 QQ 号：填你自己的大号。她只把这个号当主人。
    - 记忆：选 1 用本机 Ollama（免费，要先装 Ollama），选 2 用硅基流动（要一个硅基流动的 key），选 0 先不装。
-   - 语音：直接回车就是 3，用豆包 Seed Audio（要火山引擎豆包语音的 APP ID 和 Access Token，按语音时长约 1 元/分钟，整条回复合成一条语音，要等 15–35 秒）；选 1 用微软 Edge 的免费女声，选 2 用小米 MiMo 克隆音（要 MiMo 的 key），选 0 先不开。
+   - 语音：直接回车就是 3，用豆包 Seed Audio（要火山引擎豆包语音的 APP ID 和 Access Token，按语音时长约 1 元/分钟，整条回复合成一条语音，要等 15–35 秒）；选 4 用本机的 Breeze（免费，声音想要什么样就做什么样，要先装好，见下面「本机语音 Breeze」）；选 1 用微软 Edge 的免费女声，选 2 用小米 MiMo 克隆音（要 MiMo 的 key），选 0 先不开。
 4. 等它跑完，最后会列出每一项有没有成功。第一次要下载插件和几百张表情包，几分钟。
 5. 去 QQ 上给她发一句「在吗」。之前跟她聊过的话，先发 `/reset` 清掉旧对话。
 
 哪一项打叉了，按提示处理完再双击一次就行，装好的会自动跳过。表情包是从 GitHub 下的，下不动时工具会自己换几个加速地址再试；都不行就过一阵再双击一次。
+
+## 本机语音 Breeze
+
+Breeze TTS 2 是开源的语音模型，在你自己的显卡上算，不花钱。声音可以用一句话描述出来（「十几岁的小女生，声音甜甜的、有点奶」），也可以拿一段录音克隆。想把她改成你自己的角色，声音也能跟着换。
+
+要求：Windows，显卡显存 3 GB 以上，N 卡、A 卡、Intel 核显都行；显存 6 GB 以上用效果更好的大模型（下载 3.3 GB），不到 6 GB 用小模型（2.4 GB）。没有独立显卡也能跑，但一句话要等十几秒以上。
+
+1. 双击 `装Breeze语音.bat`。它会看你的显卡挑模型、下载程序和模型，在桌面放一个「启动Breeze语音」，再问你要不要开机自动启动。装的路径别带中文和空格。
+2. 双击 `做声音.bat`，选 1 写一句描述，它出三个候选给你听，挑一个存下来；或者选 2，拖一段 5–15 秒、只有一个人说话、没有背景音乐的录音进去，再把录音里说的原话一字不差打出来。存下来的声音叫 `dafeiyu`。
+3. 双击 `导入大肥鱼.bat`，语音选 4。
+
+用的时候 Breeze 得开着：任务栏里那个最小化的黑窗口别关，关了就双击桌面的「启动Breeze语音」。不满意声音，再双击一次 `做声音.bat` 做一个新的，会把旧的换掉，已经导入过的不用再导入。Breeze 自带一个英文网页 `http://127.0.0.1:8137`，也能做声音，存的时候名字填 `dafeiyu` 就行。
+
+Breeze 的模型只许研究和非商业使用：自己玩没问题，用它做出来的声音别拿去商用。
 
 ## 让 AI 帮手代你导入
 
@@ -42,7 +56,7 @@
    }
    ```
 
-   `base_url` 填后台网页的地址。记忆选 2 要加 `siliconflow_key_file`，语音选 2 要加 `mimo_key_file`。重跑时每一项都按这个文件来：记忆、语音要填现在在用的那个，填 0 会把已经开着的记忆或语音关掉。
+   `base_url` 填后台网页的地址。记忆选 2 要加 `siliconflow_key_file`，语音选 2 要加 `mimo_key_file`；语音选 4 不用 key，但要先装好 Breeze、做好声音（做声音是一问一答，让人自己双击 `做声音.bat`）。重跑时每一项都按这个文件来：记忆、语音要填现在在用的那个，填 0 会把已经开着的记忆或语音关掉。
 2. 在配置包文件夹里，用 AstrBot 自带的 Python 跑：`%USERPROFILE%\.astrbot_launcher\instances\<实例文件夹>\venv\Scripts\python.exe -X utf8 tools\import_dafeiyu.py --answers 回答.json`。启动器「高级」里改过数据目录的，把 `%USERPROFILE%\.astrbot_launcher` 换成那个目录。
 3. 看最后的结果列表，有打叉的照那一行的提示处理，再跑一次。
 
@@ -60,7 +74,9 @@
 
 **语音太多或太少**：改 `settings/pack.json` 里 `voice` 的 `trigger_probability`。0.33 是大约三条一次语音，1 是每条都发语音，0.1 是偶尔一次。
 
-**换个声音**：Edge 的声音在 `voice.edge.voice`，比如换成 `zh-CN-XiaoxiaoNeural`。用 MiMo 克隆音的话，把一段 5–10 秒、只有一个人说话的干净录音放进 `voice` 文件夹，重新导入时选 2。用豆包的话，声音是靠一句话描述出来的，改 `voice.doubao.persona`（比如「二十出头的女生，说话直爽利落」），重新导入时选 3。
+**换个声音**：Edge 的声音在 `voice.edge.voice`，比如换成 `zh-CN-XiaoxiaoNeural`。用 MiMo 克隆音的话，把一段 5–10 秒、只有一个人说话的干净录音放进 `voice` 文件夹，重新导入时选 2。用豆包的话，声音是靠一句话描述出来的，改 `voice.doubao.persona`（比如「二十出头的女生，说话直爽利落」），重新导入时选 3。用 Breeze 的话，再双击一次 `做声音.bat` 就行。
+
+**换成你自己的角色**：她不一定非得是大肥鱼。把 `persona/大肥鱼.md` 改成你的角色（名字、性格、说话习惯、跟你的关系），用 `做声音.bat` 给她配一个合适的声音，表情包不搭的话按上面「两套表情包」关掉，再导入一次。
 
 **唱歌**：跟她说「给我唱首歌」「唱个生日歌」，她先回一句，再发一条唱歌的语音，要等十几到四十秒。用的是语音那套豆包凭证，一首两三毛。豆包唱的是她自己编的小调，不照原曲的调子。有 N 卡、想唱准原曲调子的，把 `settings/pack.json` 里 `sing.backend` 改成 `soulx`，再按 `plugins/astrbot_plugin_dafeiyu_sing/README.md` 开唱歌服务。
 
@@ -77,11 +93,12 @@
 | 文件 | 干什么 |
 |---|---|
 | `导入大肥鱼.bat` | 双击运行的入口 |
+| `装Breeze语音.bat`、`做声音.bat` | 装本机语音 Breeze、给她做声音（语音选 4 才用），脚本在 `tools/breeze/` |
 | `persona/大肥鱼.md` | 她的人格 |
 | `settings/pack.json` | 装哪些插件、每个插件怎么设置、记忆和语音用什么 |
 | `tools/import_dafeiyu.py` | 导入工具本体，通过 AstrBot 后台接口改设置 |
 | `plugins/` | 我们写的四个插件：豆包语音、唱歌（这两个语音选 3 时才装）、改签名、回复防串台，导入工具一起装 |
-| `voice/` | MiMo 克隆音用的参考录音 |
+| `voice/` | MiMo 克隆音用的参考录音；做 Breeze 声音时的候选和试听存在 `voice/breeze/` |
 
 会装的插件：群聊插话（group_chat_plus）、长期记忆（LivingMemory）、表情包（meme_manager）、QQ 空间（qzone）、QQ 资料（qqprofile）、主动聊天（proactive_chat）。都从 AstrBot 插件市场下载，版权归各自作者。另外四个是配置包自带的：豆包语音（seed_audio_tts）、唱歌（dafeiyu_sing）、改签名（dafeiyu_signature）、回复防串台（dafeiyu_clean，DeepSeek 偶尔会把 `<system_reminder>`、`DSML` 这类内部标签当成回复吐出来，它在发出去之前删掉，聊天记录里也一起清掉）。表情包从 meme_manager 的资源广场下载（蓝色大肥鱼表情包、DeepSeek 二创表情包），图片版权归各权利人。
 
@@ -93,4 +110,4 @@
 
 ## 许可
 
-这个包里我们写的代码、人格和设置用 MIT 许可，见 `LICENSE`。导入时下载的 AstrBot 插件和表情包不在这个包里，版权和许可归各自作者。
+这个包里我们写的代码、人格和设置用 MIT 许可，见 `LICENSE`。导入时下载的 AstrBot 插件和表情包不在这个包里，版权和许可归各自作者。Breeze 的程序（[Breeze-TTS-2.cpp](https://github.com/HoppouAI/Breeze-TTS-2.cpp)，Apache-2.0）和模型也是安装时才下载，模型只许研究和非商业使用。

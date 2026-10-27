@@ -335,9 +335,10 @@ def main():
     say("\n记忆二选一：1 本机 Ollama（免费，要先装 Ollama）  2 硅基流动（要一个硅基流动的 key）  0 先不装")
     memory = ask("memory", "选", "2", choices=["0", "1", "2"])
     sf_key = ask("siliconflow_key", "硅基流动 key（输入时不显示）", secret=True) if memory == "2" else ""
-    say("\n语音三选一：3 豆包 Seed Audio（推荐，要火山引擎豆包语音的 APP ID 和 Access Token，按语音时长约 1 元/分钟）"
+    say("\n语音选一个：3 豆包 Seed Audio（推荐，要火山引擎豆包语音的 APP ID 和 Access Token，按语音时长约 1 元/分钟）"
+        "  4 本机 Breeze（免费，显卡在本机算，先用「装Breeze语音.bat」「做声音.bat」装好、做好声音）"
         "  1 微软 Edge 免费女声  2 小米 MiMo 克隆音（要 MiMo 的 key）  0 先不开")
-    voice = ask("voice", "选", "3", choices=["0", "1", "2", "3"])
+    voice = ask("voice", "选", "3", choices=["0", "1", "2", "3", "4"])
     mimo_key = ask("mimo_key", "MiMo key（输入时不显示）", secret=True) if voice == "2" else ""
     volc_app_id = volc_token = ""
     if voice == "3":
@@ -590,6 +591,29 @@ def main():
                     "seed_audio_reply_probability": v["trigger_probability"], "timeout": d["timeout"]}
             say("  试念一句「你好呀」，豆包要十几秒…")
             tts_id = d["id"] if upsert_provider(api, conf) else ""
+    elif voice == "4":
+        bz = v["breeze"]
+        try:
+            with urllib.request.urlopen(bz["api_base"] + "/voices", timeout=10) as r:
+                have = [x.get("id") for x in json.loads(r.read() or b"[]")]
+        except Exception:
+            have = None
+        if have is None:
+            warn("连不上本机的 Breeze。先双击桌面的「启动Breeze语音」，没装的话先双击「装Breeze语音.bat」。")
+        elif bz["voice"] not in have:
+            warn(f"Breeze 里还没有叫 {bz['voice']} 的声音，先双击「做声音.bat」做一个。")
+        else:
+            conf = {"id": bz["id"], "type": "openai_tts_api", "provider": "openai", "provider_type": "text_to_speech",
+                    "enable": True, "api_key": "unused", "api_base": bz["api_base"], "model": "tts-1",
+                    "openai-tts-voice": bz["voice"], "timeout": 180, "proxy": ""}
+            say("  试念一句，Breeze 要几秒…")
+            tts_id = bz["id"] if upsert_provider(api, conf) else ""
+    if voice != "3":
+        # 以前选过豆包又换了别的：豆包插件只要看到它的提供商开着就会掷骰子发整条语音，得关掉
+        old = provider_config(api, v["doubao"]["id"])
+        if old and old.get("enable"):
+            upsert_provider(api, {**old, "enable": False})
+            say("  之前开着的豆包语音已关掉")
     if tts_id:
         good, why = test_provider(api, tts_id)
         if good:

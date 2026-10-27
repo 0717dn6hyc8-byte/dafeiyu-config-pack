@@ -149,6 +149,12 @@
       "max_attempts": 2,
       "whole_reply": true,
       "timeout": 60
+    },
+    "breeze": {
+      "id": "大肥鱼语音-Breeze",
+      "api_base": "http://127.0.0.1:8137/v1",
+      "voice": "dafeiyu",
+      "persona": "一个憨萌软糯的小女生，声音甜甜的、有点奶，十几岁的感觉，嘴馋爱撒娇，带一点小傲娇"
     }
   },
   "sing": {
