@@ -61,7 +61,7 @@
       "config": {
         "semantic.enabled": false,
         "generation.emotion.llm.enabled": false,
-        "generation.trigger.scope": "only_chat_llm",
+        "generation.trigger.scope": "chat_and_plugin_llm",
         "generation.prompt.quantity_guidance_enabled": true,
         "generation.emotion.probability": 35,
         "generation.emotion.max_memes_per_message": 1

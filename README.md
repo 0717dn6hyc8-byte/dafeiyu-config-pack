@@ -54,6 +54,8 @@
 
 **表情包发得太多或太少**：改 `settings/pack.json` 里 `meme_manager` 那段的 `generation.emotion.probability`。35 大约三条回复一张图，调大发得多，调小发得少。
 
+**私聊发表情包、群里一张不发**：2026 年 10 月 27 日之前下载的配置包有这个问题。群里的回复是群聊插件代发的，表情包插件原来的设置只给普通聊天配图。重新下载配置包，再双击一次 `导入大肥鱼.bat` 就好。不想重新导入的话，在 AstrBot 后台打开 meme_manager 的插件配置，把「表情附加触发范围」从 `only_chat_llm` 改成 `chat_and_plugin_llm`，保存即可。
+
 **两套表情包**：默认蓝色大肥鱼和 DeepSeek 二创两套一起用，发图时从两套里一起挑。只想用一套，把 `settings/pack.json` 里 `meme_packs` 那套的 `use` 改成 `false`，再导入一次。
 
 **语音太多或太少**：改 `settings/pack.json` 里 `voice` 的 `trigger_probability`。0.33 是大约三条一次语音，1 是每条都发语音，0.1 是偶尔一次。
