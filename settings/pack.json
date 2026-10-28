@@ -1,8 +1,8 @@
 {
   "说明": "导入工具按这份清单改 AstrBot。想调哪项，改这里的值再运行一次导入工具就行。{主人会话} 会换成你机器人的会话 ID，{对话模型} 会换成你在后台建的 DeepSeek 模型。",
   "persona": {
-    "id": "大肥鱼",
-    "file": "persona/大肥鱼.md"
+    "id": "碧翠丝",
+    "file": "persona/碧翠丝.md"
   },
   "base": {
     "provider_settings.identifier": true,
@@ -16,7 +16,7 @@
     "platform_settings.empty_mention_waiting": false,
     "provider_ltm_settings.active_reply.enable": false,
     "agent_runner.config.compression.max_turns": 30,
-    "agent_runner.config.persona.persona_id": "大肥鱼"
+    "agent_runner.config.persona.persona_id": "碧翠丝"
   },
   "chat_model": {
     "custom_extra_body": {"thinking": {"type": "disabled"}}
@@ -142,7 +142,7 @@
       "api_base": "https://openspeech.bytedance.com/api/v3/tts/create",
       "resource_id": "seed-audio-1.0",
       "model": "seed-audio-1.0",
-      "persona": "一个憨萌软糯的小女生，声音甜甜的、有点奶，十几岁的感觉，嘴馋爱撒娇，带一点小傲娇",
+      "persona": "一个傲娇的小女孩，声音清脆稚嫩，大小姐语调，端着架子，嘴硬心软",
       "prompt_template": "{persona}，在QQ上给好朋友发语音，语气轻快自然，只说引号里的这句话，一字不差：“{text}”",
       "format": "mp3",
       "sample_rate": 24000,
@@ -154,7 +154,7 @@
       "id": "大肥鱼语音-Breeze",
       "api_base": "http://127.0.0.1:8137/v1",
       "voice": "dafeiyu",
-      "persona": "一个憨萌软糯的小女生，声音甜甜的、有点奶，十几岁的感觉，嘴馋爱撒娇，带一点小傲娇"
+      "persona": "一个傲娇的小女孩，声音清脆稚嫩，大小姐语调，端着架子，嘴硬心软"
     }
   },
   "sing": {

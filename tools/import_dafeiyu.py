@@ -379,8 +379,8 @@ def main():
         say("  不是 DeepSeek 模型，跳过")
 
     # ---------- 人格 ----------
-    step("写入人格「大肥鱼」")
     pid = pack["persona"]["id"]
+    step(f"写入人格「{pid}」")
     text = open(os.path.join(PACK, pack["persona"]["file"]), encoding="utf-8-sig").read().replace("{OWNER_QQ}", owner)
     qid = urllib.parse.quote(pid, safe="")
     cur = api.call("GET", f"/personas/{qid}")
